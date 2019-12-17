@@ -147,7 +147,7 @@ ponteiro = {
     animacao: 0,
     intervalo: 0,
     inimigos_existentes: 0,
-    partidaStatus: "requisitar"
+    partidaStatus: "ativa"
 };
 
 
