@@ -1,6 +1,141 @@
+function limpaQuadro(){
+    context.clearRect(0, 0, canvas.width, canvas.height);
+}
+function MinMax(min, max){
+    return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+function crimp(str, size){
+    add = Math.floor((size - str.length) / 2);
+    return ' '.repeat(add) + str + ' '.repeat(add);
+}
+function centralize(str, linha){
+    gotoxy(str, Math.round(50 - str.length/2), linha);
+}
+function logo(){
+    centralize(".dP\"Y8 888888    db    88\"\"Yb 8b    d8    db    88b 88 ", 5);
+    centralize(" `Ybo.\"   88     dPYb   88__dP 88b  d88   dPYb   88Yb88 ", 6);
+    centralize("o. `Y8b   88    dP__Yb  88\"Yb  88YbdP88  dP__Yb  88 Y88 ", 7);
+    centralize("8bodP'   88   dP\"\"\"\"Yb 88  Yb 88 YY 88 dP\"\"\"\"Yb 88  Y8 ", 8);
+}
+function gotoxy(letter, x, y, color='white', bold=false){
+    if(mobile == true){
+        size = canvas.height * 0.0337;
+    }else{
+        size = canvas.width*0.017;
+    }
+	context.font = (bold ? "900 " : "") + size +"px Courier New";
+	//context.fontFamily = "DontSpot, sheepsans"; 
+    context.fillStyle = color;
+	var ctext = letter;
+    context.fillText(ctext, x*(canvas.width/104), (y+2)*(canvas.height/37));
+}
+
+
+
+
+  
+/* Fullscreen */
+function fullscreen(){
+	var e = document.getElementsByTagName("canvas")[0]; // element
+	(e.requestFullscreen && e.requestFullscreen())
+	||
+	(e.msRequestFullscreen && e.msRequestFullscreen())
+	||
+	(e.mozRequestFullScreen && e.mozRequestFullScreen())
+	||
+	(e.webkitRequestFullscreen && e.webkitRequestFullscreen());
+}
+function isFullscreen(){
+	return Boolean(document.fullscreen || document.webkitFullscreen || document.mozFullScreen || document.msFullscreen);
+}
+
+
+function fopen(file, callback1, callback2){
+    var oXHR = new XMLHttpRequest();
+    oXHR.open("GET", file, true);
+    oXHR.onreadystatechange = function (oEvent) {  
+        if (oXHR.readyState === 4) {  
+            if (oXHR.status === 200){  
+              callback1(oXHR.responseText);
+            } else {  
+               callback2();  
+            }  
+        }  
+    }; 
+    oXHR.send(null);  
+}
+function controleMenu(c, selecionado_indice){
+    c = c.toLowerCase();
+    switch(c){//o char eh convertido em minúsculo pra evitar erro de Capslock
+        case 's': //se a entrada for um S (pra baixo)
+            if(selecionado_indice<2) //verifica se está no ultimo item
+                ponteiro.selecionado_indice+=1;//senão, leva o cursor pro prox item
+          else ponteiro.selecionado_indice=0;//se sim, leva o cursor pro primeiro item
+           
+              break;
+      case 'w'://se a entrada for um W (pra cima)
+          if(selecionado_indice>0)//verifica se esta no primeiro item
+            ponteiro.selecionado_indice-=1;//senão, leva o cursor pro item de cima
+          else ponteiro.selecionado_indice=2;//se sim, leva o cursor para baixo
+          break;
+      case ' '://se a entrada for o espaço
+      case 10://ou enter
+          return selecionado_indice; //termina a função
+          break;
+      default: break;
+  }
+
+  return -1;
+}
+
+function controlePartida(c){
+
+    c = c.toLowerCase(); //evita que o controle nao funcione caso o capslock esteja ativado
+
+    switch(c){
+        case 's': //se a entrada eh a tecla s
+            if(!ehParede((jogador.x+ponteiro.posicao) % DEFINE.COLUNAS_MAPA, jogador.y+1)){//caso a prox pos pra baixo do jogador nao seja PAREDE
+                jogador.y+=1;                                     //desloca a nave para baixo
+            }
+            break;
+        case 'w': //se a entrada eh a tecla w
+            if(!ehParede((jogador.x+ponteiro.posicao) % DEFINE.COLUNAS_MAPA, jogador.y-2) && !ehParede((jogador.x+ponteiro.posicao) % DEFINE.COLUNAS_MAPA, jogador.y-1)){//caso a prox pos pra cima do jogador nao seja PAREDE
+                jogador.y-=1;                                   //desloca a nave para cima
+            }
+            break;
+        case 'd'://se a entrada eh a tecla s
+            if(jogador.velocidade < DEFINE.VEL_MAX){ //confere se a velocidade eh menor que a max
+                jogador.velocidade++;               //antes de acelerar mais
+            }
+            break;
+        case 'a'://se a entrada eh a tecla a
+            if(jogador.velocidade > DEFINE.VEL_MIN){ //confere se a velocidade ainda eh maior que a min
+                jogador.velocidade--;               //antes de desacelerar
+            }
+            break;
+        case ' '://se a entrada eh um espaço
+            if(ponteiro.intervalo==0){ //(cooldown) se o tiro nao foi dado recentemente
+		    //gera o tiro a partir da posição do jogador, dentro dos limites da tela
+		    //ex.:tela na pos 400, jogador na pos 19: pos do jogador=419
+		    //sendo o limite da tela 414, %COLUNAS_MAPA garante que o tiro iniciará na pos verdadeira
+		    //do jogador(x=4)
+                geraTiro(1, (jogador.x + ponteiro.posicao) % DEFINE.COLUNAS_MAPA, jogador.y);
+                ponteiro.intervalo = DEFINE.INTERVALO_TIRO;//e atribui um valor de espera para novo tiro
+            }
+            break;
+
+        case 'g'://se a entrada eh um g
+            //*salvar_estado = 1; //o estado do jogo é salvo
+            break;
+
+        default:
+         break;
+    }    
+    return 0;
+}
 /* Defines */
 //Menu
-DEFINE = {
+var DEFINE = {
     "NOVO_JOGO": 0,
     "CONTINUAR_JOGO": 1,
     "SAIR": 2,
@@ -25,7 +160,7 @@ DEFINE = {
 // Tiro
     "MAX_TIROS": 15,
     "VEL_BALA": 5,
-    "DURACAO_TIRO": 20,
+    "DURACAO_TIRO": 25,
 
 // Jogador
     "DURACAO_ANIMACAO": 15,
@@ -49,68 +184,24 @@ tiro_t = function(x, y, prop, duracao){ return {x, y, prop, duracao} };
 
 /*********************** */
 
-/* FullScreen */
-function fullscreen(){
-	var e = document.getElementsByTagName("canvas")[0]; // element
-	(e.requestFullscreen && e.requestFullscreen())
-	||
-	(e.msRequestFullscreen && e.msRequestFullscreen())
-	||
-	(e.mozRequestFullScreen && e.mozRequestFullScreen())
-	||
-	(e.webkitRequestFullscreen && e.webkitRequestFullscreen());
-}
-function isFullscreen(){
-	return Boolean(document.fullscreen || document.webkitFullscreen || document.mozFullScreen || document.msFullscreen);
-}
-
-
-/* ::auxiliares:: */
-function limpaQuadro(){
-    context.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-function MinMax(min, max){
-    return Math.floor(Math.random() * (max - min + 1) ) + min;
-}
-
+/** Canvas Game Box */
 
 document.body.style.backgroundColor = "#1b1b1b";
 
-const canvas = document.createElement("canvas")
-const context = canvas.getContext('2d')
+canvas = document.createElement("canvas")
+context = canvas.getContext('2d')
 
 document.body.appendChild(canvas)
 
-canvas.width = window.outerWidth * 0.9;
-canvas.height = canvas.width / 1.6;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
 canvas.style.backgroundColor = "black"
 canvas.style.border = "0px solid orangered";
 canvas.style.margin = "auto";
 canvas.style.display = canvas.width < 700 ? "none" : "block";
 
-if(canvas.style.display == "none") modeMobile();
-
-
-
-function gotoxy(letter, x, y){
-    size = canvas.width*0.017;
-	context.font = size + "px Courier New";
-	context.fontFamily = "DontSpot, sheepsans"; 
-	context.fillStyle = "rgb(255, 255, 255)";
-	var ctext = letter;
-	context.fillText(ctext, x*(size*0.5599), (y+2)*(size*1));
-}
-
-
-
-i = 0;
-coluna = 0;
-linha = 0;
-matriz = [];
-matriz[0] = [];
-
+/** Game Data */
 
 TELA = "menu";
 
@@ -133,13 +224,81 @@ ponteiro = {
 };
 
 
+/** Mapa Info. */
 
-function reproduzir(){
-    ponteiro.tocandoTema = 1;
-    audio = new Audio('musica/tema.mp3');
-    audio.play();
+var i;
+var coluna;
+var linha;
+var matriz;
+var jpos = 0;
+var delta = 0;
+var mobile = false;
+var espera = 10;
 
+
+
+if(canvas.style.display == "none"){
+    modeMobile();
+    init();
+    mobile = true;
 }
+
+function main(){
+
+    if(delta<Date.now()){
+
+        delta = Date.now() + espera;
+
+        switch(TELA){
+            case "menu":
+                MENU_INICIAL();
+            break;
+            case "partida":
+                partida();
+            break;
+            case "creditos":
+                FIM_DE_JOGO();
+            break;
+        }
+    }
+
+    requestAnimationFrame(main);
+}
+
+
+document.onkeypress = function(e){
+    e.preventDefault();
+
+    if(ponteiro.tocandoTema==0)
+        reproduzir();
+    
+    switch(TELA){
+        case "menu":
+            if((ponteiro.selecionado = controleMenu(e.key, ponteiro.selecionado_indice))!=-1){
+                switch(ponteiro.selecionado){
+                    case 0:
+                        TELA = "partida";
+                    break;
+                    case 1:
+                        TELA = "partida";
+                        ponteiro.salve = 1;
+                    break;
+                        case 2:
+                        TELA = "creditos";
+                    break;
+                }
+            }
+        break;
+        case "partida":
+            controlePartida(e.key);
+        break;
+        default:
+            return;
+    }
+}
+document.addEventListener("DOMContentLoaded", main);
+
+
 
 function atualizaInimigo(indice){
     var minimo = 1, maximo = 5;//variaveis para sorteio de movimento
@@ -154,13 +313,13 @@ function atualizaInimigo(indice){
     }
 
     /**Gera os movimentos dos inimigos***/
-    switch(/*MinMax(minimo, maximo)*/ 0){//faz um sorteio com srand
+    switch(MinMax(minimo, maximo)){//faz um sorteio com srand
         case 1://se a prox pos. do inimigo pra baixo nao eh parede
-            if(!ehParede(inimigo.x, inimigo[indice].y+1))
+            if(!ehParede(inimigo[indice].x, inimigo[indice].y+1))
                 inimigo[indice].y += 1;//o inimigo se move uma pos. pra baixo
             break;
         case 2://se nem a prox nem a seguinte posição acima do inimigo eh parede
-            if(!ehParede(inimigo[indice].x, inimigo[indice].y-2) && !ehParede(inimigo.x, inimigo.y-1))
+            if(!ehParede(inimigo[indice].x, inimigo[indice].y-2) && !ehParede(inimigo[indice].x, inimigo[indice].y-1))
                 inimigo[indice].y -= 1;//o inimigo se move para cima
             break;
 
@@ -199,180 +358,18 @@ function atualizaInimigo(indice){
     return;
 }
 
-
-jpos = 0;
-
-function atualizaQuadro(){
-    var i; // iterador
-
-	// busca todos os tiros existentes no jogo e faz uma checagem
-	// se está na mesma posição que um jogador ou inimigo
-	// caso esteja, tira a vida dele.
-    buscaTiro();
-
-	// Contagens regressivas:
-    if(ponteiro.animacao>0) ponteiro.animacao -= 1; // enquanto animação for maior que 0, o jogador fica piscando
-    if(ponteiro.intervalo>0) ponteiro.intervalo -= 1; // enquanto intervalo for maior que zero, o jogador nao pode atirar
-    if(ponteiro.salvar_estado_mensagem>0) ponteiro.salvar_estado_mensagem -= 1; // enquanto salvar_estado_mensagem for maior que zero, uma mensagem "Estado Salvo" é exibida
-
-	// Checagem se o jogador está encostando em uma parede:
-	//  0 indica o primeiro caractere da nave(parte traseira),
-	//  3 o ultimo(parte frontal)
-    if( ehParede(jogador.x+ponteiro.posicao+0, jogador.y) || //se a pos x do jogador é igual a da parede de trás OU
-        ehParede(jogador.x+ponteiro.posicao+1, jogador.y) || //se as partes internas
-		ehParede(jogador.x+ponteiro.posicao+2, jogador.y) || // da nave estão numa parede.
-		ehParede(jogador.x+ponteiro.posicao+3, jogador.y)
-	  ){ //se a pos x do jogador é igual a da parede da frente
-
-		if(ponteiro.animacao==0){ // e se o jogador deixou de piscar
-			jogador.nvidas--; //o jogador perde uma vida
-	        ponteiro.animacao = DEFINE.DURACAO_ANIMACAO; //a perda da vida é sinalizada por animação
-		}
-        jogador.y = 15; //buscaParede(mapa, jogador.x+posicao+4, 0, 1, 0) + 2; // a posição do jogador é redefinida para um lugar aberto sem parede.
-        jogador.velocidade = DEFINE.VEL_MIN; // o jogador volta para a velocidade minima
-    }
-
-	// Checando os inimigos existentes:
-    for(i=0; i<ponteiro.inimigos_existentes; i++){
-		// Checando se o inimigo está encostando no jogador:
-        //
-        if(typeof inimigo[i] == "object"){
-
-            if( ponteiro.animacao==0 &&
-            jogador.x+ponteiro.posicao+0 <= inimigo[i].x+1 && jogador.x+ponteiro.posicao+3 >= inimigo[i].x && //verifica se o jogador e inimigo estão na mesma pos x
-                (Math.abs(jogador.y - inimigo[i].y) <= 1)){ //verifica o modulo da distancia vertical entre inimigo e jogador
-                jogador.nvidas--; // se o jogador estiver dentro da parte visual do inimigo, jogador perde uma vida.
-                ponteiro.animacao = DEFINE.DURACAO_ANIMACAO; //perda da vida sinalizada por animação
-            }
-
-            atualizaInimigo(i);
-
-            if(MinMax(0,DEFINE.CHANCE_DE_TIRO)==DEFINE.CHANCE_DE_TIRO){
-                geraTiro(2, inimigo[i].x, inimigo[i].y);
-            }
-
-        }
-    }
-    for(i=0; i<DEFINE.MAX_TIROS; i++){
-        if(typeof tiro[i] == "object"){
-            if(tiro[i].prop==1){ // tiro do jogador
-                tiro[i].x += DEFINE.VEL_BALA;
-                if(tiro[i].x>=DEFINE.COLUNAS_MAPA) tiro[i].x = 0;
-            }else{ // tiro do inimigo
-                tiro[i].x -= DEFINE.VEL_BALA;
-                if(tiro[i].x<0) tiro[i].x=DEFINE.COLUNAS_MAPA-1;
-            }
-            // remove tiro após o fim da duração
-            if(tiro[i].duracao==0){
-                tiro[i].prop = 0;
-            }else tiro[i].duracao--;
-        }
-    }
-    return;
+function deletaInimigo(indice){
+    inimigo[indice] = inimigo[ponteiro.inimigos_existentes-1];
+    ponteiro.inimigos_existentes--;
 }
 
-function geraPosicao(x, posicao){
-    var reposicao = x - posicao;
-    if(posicao <= (DEFINE.COLUNAS_MAPA - DEFINE.COLUNAS_TELA) && reposicao>0 && x<DEFINE.COLUNAS_TELA+posicao-1){
-        return reposicao;
-    }else if(posicao>(DEFINE.COLUNAS_MAPA - DEFINE.COLUNAS_TELA)){
-        reposicao = x - posicao;
-        if(x<(DEFINE.COLUNAS_MAPA - DEFINE.COLUNAS_TELA)) reposicao += DEFINE.COLUNAS_MAPA;
-        if(reposicao>0 && reposicao<(DEFINE.COLUNAS_TELA-1)){
-            return reposicao;
-        }
-    }
-    return 0;
+function geraInimigo(x, y){
+    inimigo.push(boneco_t(x, y, 1, 1));
 }
-
-function geraQuadro(){
-    var i, linha=0, coluna_tela=0, coluna_mapa=0, posicao_inimigo;
-
-    //Print na primeira linha na tela dos dados do jogo (Fase, Vidas e Pontos)
-    gotoxy("| Fase: "+ponteiro.nivel+" |  Vidas: "+jogador.nvidas+" |  Pontos: "+ponteiro.pontuacao+" |", 0, -1);
-/*    if(ponteiro.salvar_estado_mensagem>0)      //quando o estado do jogo eh salvo
-        printa(-1, "Estado Salvo"); //uma mensagem aparece na tela para confirmar
-    printf("\n");
-*/
-    /*** Gerando Jogador ***/
-    if(ponteiro.animacao%3==0){
-
-        gotoxy("@", jogador.x, jogador.y-1);
-        gotoxy("@@@@", jogador.x, jogador.y);
-
-    }
-
-    /*** Gerando Inimigos ***/
-    for(i=0; i<ponteiro.inimigos_existentes; i++){
-        if(typeof inimigo[i]=="object"){
-            posicao_inimigo = geraPosicao(inimigo[i].x, ponteiro.posicao);
-            //console.log(posicao_inimigo);
-            if(posicao_inimigo>0){
-                gotoxy("XX", posicao_inimigo, inimigo[i].y-1);
-                gotoxy("XX", posicao_inimigo, inimigo[i].y);
-            }
-        }
-    }
-
-    /*** Gerando Tiros ***/
-    for(i=0; i<DEFINE.MAX_TIROS; i++){
-        if(typeof tiro[i] == "object"){
-            posicao_inimigo = geraPosicao(tiro[i].x, ponteiro.posicao);
-            if(posicao_inimigo>0){
-                letter = (tiro[i].prop==1) ? "--" :".";
-                gotoxy(letter, posicao_inimigo, tiro[i].y);
-            }
-        }
-    }
-
-
-    /*** Gerando Paredes ***/
-
-	if(DEFINE.COLUNAS_MAPA - ponteiro.posicao >= DEFINE.COLUNAS_TELA){ // checa se o mapa precisa ser lido o seu inicio
-		for(linha=0; linha<DEFINE.LINHAS_MAPA; linha++){ // percorre as linhas
-			coluna_tela = 0; // coluna da tela atual(37x105) eh zero
-			for(coluna_mapa=ponteiro.posicao; coluna_tela<DEFINE.COLUNAS_TELA; coluna_mapa++, coluna_tela++){ // percorre a coluna
-				if(ehParede(coluna_mapa, linha)){ // se encontrar uma parede
-                    gotoxy(DEFINE.PAREDE, coluna_tela, linha);
-				}
-			}
-		}
-	}else{ // caso precise escrever o inicio da matriz do mapa junto do seu fim...
-		for(linha=0; linha<DEFINE.LINHAS_MAPA; linha++){ // percorre as linhas
-			coluna_tela = 0; // coluna da tela atual(37x105) eh zero
-			for(coluna_mapa=ponteiro.posicao; coluna_mapa<DEFINE.COLUNAS_MAPA; coluna_mapa++, coluna_tela++){ // percorre a coluna
-				if(ehParede(coluna_mapa, linha)){ // se encontrar uma parede
-					gotoxy(DEFINE.PAREDE, coluna_tela, linha);
-				}
-			}
-			for(coluna_mapa=0; coluna_tela<DEFINE.COLUNAS_TELA; coluna_mapa++, coluna_tela++){ // percorre o resto da coluna
-				if(ehParede(coluna_mapa, linha)){ // se encontrar uma parede
-                    gotoxy(DEFINE.PAREDE, coluna_tela, linha);
-				}
-			}
-		}
-	}
-
-}
-
-function fopen(file, callback1, callback2){
-    var oXHR = new XMLHttpRequest();
-    oXHR.open("GET", file, true);
-    oXHR.onreadystatechange = function (oEvent) {  
-        if (oXHR.readyState === 4) {  
-            if (oXHR.status === 200){  
-              callback1(oXHR.responseText);
-            } else {  
-               callback2();  
-            }  
-        }  
-    }; 
-    oXHR.send(null);  
-}
-
 function geraMapa(indice){
     fopen(DEFINE.MAPA_CAMINHO.replace("%d",indice), 
           function(mapa){
+            ponteiro.posicao = 0;
             ponteiro.inimigos_existentes = 0;
             i=0;
             coluna = 0;
@@ -410,74 +407,191 @@ function geraMapa(indice){
           });
 }
 
+function ehParede(x, y){
+    return matriz[y] && matriz[y][x] == DEFINE.PAREDE;
+}
+function startMobile(){
+    canvas.style.display = "block";
+}
+function modeMobile(){
+    botao = document.createElement("button");
+    botao.innerHTML = "Abrir FullScreen";
+    botao.style.display="block";
+    botao.style.margin = "auto";
+    botao.addEventListener("click", function(){
+        botao.style.display="none";
+        fullscreen();
+    });
+    document.body.appendChild(botao);
+}
 
-function partida(){
 
-    limpaQuadro();
+document.onfullscreenchange = window.onresize = function(){ 
+    if(typeof document.onfullscreenchange == "undefined" || isFullscreen()){
+        console.log("a");
+        startMobile(); 
+    }
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
 
-    if(ponteiro.partidaStatus == "requisitar"){
-        ponteiro.partidaStatus = "requisitando";
-        if(ponteiro.salve == 1){
-            ponteiro.salve = 0;
+function reproduzir(){
+    ponteiro.tocandoTema = 1;
+    audio = new Audio('musica/tema.mp3');
+    audio.play();
+
+}
+function geraPosicao(x, posicao){
+    var reposicao = x - posicao;
+    if(posicao <= (DEFINE.COLUNAS_MAPA - DEFINE.COLUNAS_TELA) && reposicao>0 && x<DEFINE.COLUNAS_TELA+posicao-1){
+        return reposicao;
+    }else if(posicao>(DEFINE.COLUNAS_MAPA - DEFINE.COLUNAS_TELA)){
+        reposicao = x - posicao;
+        if(x<(DEFINE.COLUNAS_MAPA - DEFINE.COLUNAS_TELA)) reposicao += DEFINE.COLUNAS_MAPA;
+        if(reposicao>0 && reposicao<(DEFINE.COLUNAS_TELA-1)){
+            return reposicao;
         }
-        geraMapa(ponteiro.nivel);
-    }else if(ponteiro.partidaStatus == "ativa"){
-        if(ponteiro.inimigos_existentes > 0){
-            ponteiro.posicao+=jogador.velocidade;
-            
-            if(ponteiro.posicao>=DEFINE.COLUNAS_MAPA){
-                ponteiro.posicao = 0;
+    }
+    return 0;
+}
+
+function atualizaQuadro(){
+    var i; // iterador
+
+	// busca todos os tiros existentes no jogo e faz uma checagem
+	// se está na mesma posição que um jogador ou inimigo
+	// caso esteja, tira a vida dele.
+    buscaTiro();
+
+	// Contagens regressivas:
+    if(ponteiro.animacao>0) ponteiro.animacao -= 1; // enquanto animação for maior que 0, o jogador fica piscando
+    if(ponteiro.intervalo>0) ponteiro.intervalo -= 1; // enquanto intervalo for maior que zero, o jogador nao pode atirar
+    if(ponteiro.salvar_estado_mensagem>0) ponteiro.salvar_estado_mensagem -= 1; // enquanto salvar_estado_mensagem for maior que zero, uma mensagem "Estado Salvo" é exibida
+
+	// Checagem se o jogador está encostando em uma parede:
+	//  0 indica o primeiro caractere da nave(parte traseira),
+	//  3 o ultimo(parte frontal)
+    if( ehParede(jogador.x+ponteiro.posicao+0, jogador.y) || //se a pos x do jogador é igual a da parede de trás OU
+        ehParede(jogador.x+ponteiro.posicao+1, jogador.y) || //se as partes internas
+		ehParede(jogador.x+ponteiro.posicao+2, jogador.y) || // da nave estão numa parede.
+        ehParede(jogador.x+ponteiro.posicao+3, jogador.y) ||
+        ehParede(jogador.x+ponteiro.posicao+0, jogador.y-1)
+	  ){ //se a pos x do jogador é igual a da parede da frente
+
+		if(ponteiro.animacao==0){ // e se o jogador deixou de piscar
+			jogador.nvidas--; //o jogador perde uma vida
+	        ponteiro.animacao = DEFINE.DURACAO_ANIMACAO; //a perda da vida é sinalizada por animação
+		}
+        jogador.y = 15; //buscaParede(mapa, jogador.x+posicao+4, 0, 1, 0) + 2; // a posição do jogador é redefinida para um lugar aberto sem parede.
+        jogador.velocidade = DEFINE.VEL_MIN; // o jogador volta para a velocidade minima
+    }
+
+	// Checando os inimigos existentes:
+    for(i=0; i<ponteiro.inimigos_existentes; i++){
+		// Checando se o inimigo está encostando no jogador:
+        //
+        if(typeof inimigo[i] == "object"){
+
+            if( ponteiro.animacao==0 &&
+            jogador.x+ponteiro.posicao+0 <= inimigo[i].x+1 && jogador.x+ponteiro.posicao+3 >= inimigo[i].x && //verifica se o jogador e inimigo estão na mesma pos x
+                (Math.abs(jogador.y - inimigo[i].y) <= 1)){ //verifica o modulo da distancia vertical entre inimigo e jogador
+                jogador.nvidas--; // se o jogador estiver dentro da parte visual do inimigo, jogador perde uma vida.
+                ponteiro.animacao = DEFINE.DURACAO_ANIMACAO; //perda da vida sinalizada por animação
             }
 
-            atualizaQuadro();
+            if(MinMax(1, 10) == 5)
+                atualizaInimigo(i);
 
-            geraQuadro();
-        }else{
-            ponteiro.nivel+=1;
-            ponteiro.partidaStatus = "requisitar";
+            if(MinMax(0,DEFINE.CHANCE_DE_TIRO)==DEFINE.CHANCE_DE_TIRO){
+                geraTiro(2, inimigo[i].x, inimigo[i].y);
+            }
+
         }
     }
-}
-
-
-/** ::TELAS:: */
-
-function crimp(str, size){
-    add = Math.floor((size - str.length) / 2);
-    return ' '.repeat(add) + str + ' '.repeat(add);
-}
-
-
-delta = 0;
-
-function main(){
-
-    if(delta<Date.now()){
-
-        delta = Date.now() + 10;
-
-        switch(TELA){
-            case "menu":
-                MENU_INICIAL();
-            break;
-            case "partida":
-                partida();
-            break;
-            case "creditos":
-                FIM_DE_JOGO();
-            break;
+    for(i=0; i<tiro.length; i++){
+        if(typeof tiro[i] == "object"){
+            if(tiro[i].prop==1){ // tiro do jogador
+                tiro[i].x += DEFINE.VEL_BALA * jogador.velocidade;
+                if(tiro[i].x>=DEFINE.COLUNAS_MAPA) tiro[i].x = 0;
+            }else{ // tiro do inimigo
+                tiro[i].x -= DEFINE.VEL_BALA;
+                if(tiro[i].x<0) tiro[i].x=DEFINE.COLUNAS_MAPA-1;
+            }
+            // remove tiro após o fim da duração
+            if(tiro[i].duracao==0){
+                tiro[i].prop = 0;
+            }else tiro[i].duracao--;
         }
     }
-    requestAnimationFrame(main);
+    return;
 }
 
-function logo(){
-  centralize(".dP\"Y8 888888    db    88\"\"Yb 8b    d8    db    88b 88 ", 5);
-  centralize(" `Ybo.\"   88     dPYb   88__dP 88b  d88   dPYb   88Yb88 ", 6);
-  centralize("o. `Y8b   88    dP__Yb  88\"Yb  88YbdP88  dP__Yb  88 Y88 ", 7);
-  centralize("8bodP'   88   dP\"\"\"\"Yb 88  Yb 88 YY 88 dP\"\"\"\"Yb 88  Y8 ", 8);
-}
+function geraQuadro(){
+    var i, linha=0, coluna_tela=0, coluna_mapa=0, posicao_inimigo;
 
+    /*** Gerando Jogador ***/
+    if(ponteiro.animacao%3==0){
+
+        gotoxy("@", jogador.x, jogador.y-1);
+        gotoxy("@@@@", jogador.x, jogador.y);
+
+    }
+
+    /*** Gerando Inimigos ***/
+    for(i=0; i<ponteiro.inimigos_existentes; i++){
+        if(typeof inimigo[i]=="object"){
+            posicao_inimigo = geraPosicao(inimigo[i].x, ponteiro.posicao);
+            //console.log(posicao_inimigo);
+            if(posicao_inimigo>0){
+                gotoxy("XX", posicao_inimigo, inimigo[i].y-1);
+                gotoxy("XX", posicao_inimigo, inimigo[i].y);
+            }
+        }
+    }
+
+    /*** Gerando Tiros ***/
+    for(i=0; i<tiro.length; i++){
+        if(typeof tiro[i] == "object"){
+            posicao_inimigo = geraPosicao(tiro[i].x, ponteiro.posicao);
+            if(posicao_inimigo>0){
+                letter = (tiro[i].prop==1) ? "--" :".";
+                gotoxy(letter, posicao_inimigo, tiro[i].y);
+            }
+        }
+    }
+
+
+    /*** Gerando Paredes ***/
+
+	if(DEFINE.COLUNAS_MAPA - ponteiro.posicao >= DEFINE.COLUNAS_TELA){ // checa se o mapa precisa ser lido o seu inicio
+		for(linha=0; linha<DEFINE.LINHAS_MAPA; linha++){ // percorre as linhas
+			coluna_tela = 0; // coluna da tela atual(37x105) eh zero
+			for(coluna_mapa=ponteiro.posicao; coluna_tela<DEFINE.COLUNAS_TELA; coluna_mapa++, coluna_tela++){ // percorre a coluna
+				if(ehParede(coluna_mapa, linha)){ // se encontrar uma parede
+                    gotoxy(DEFINE.PAREDE, coluna_tela, linha);
+				}
+			}
+		}
+	}else{ // caso precise escrever o inicio da matriz do mapa junto do seu fim...
+		for(linha=0; linha<DEFINE.LINHAS_MAPA; linha++){ // percorre as linhas
+			coluna_tela = 0; // coluna da tela atual(37x105) eh zero
+			for(coluna_mapa=ponteiro.posicao; coluna_mapa<DEFINE.COLUNAS_MAPA; coluna_mapa++, coluna_tela++){ // percorre a coluna
+				if(ehParede(coluna_mapa, linha)){ // se encontrar uma parede
+					gotoxy(DEFINE.PAREDE, coluna_tela, linha);
+				}
+			}
+			for(coluna_mapa=0; coluna_tela<DEFINE.COLUNAS_TELA; coluna_mapa++, coluna_tela++){ // percorre o resto da coluna
+				if(ehParede(coluna_mapa, linha)){ // se encontrar uma parede
+                    gotoxy(DEFINE.PAREDE, coluna_tela, linha);
+				}
+			}
+		}
+    }
+    
+    gotoxy("| Fase: "+ponteiro.nivel+" |  Vidas: "+jogador.nvidas+" |  Pontos: "+ponteiro.pontuacao+" | "+ponteiro.posicao, 0, -1, 'red', true);
+
+
+}
 function MENU_INICIAL(){
     var continua = 0;
 	var i; // iterador
@@ -506,60 +620,57 @@ function MENU_INICIAL(){
 
 }
 
-function centralize(str, linha){
-    gotoxy(str, Math.round(50 - str.length/2), linha);
-}
+function partida(){
+    limpaQuadro();
 
+    if(ponteiro.partidaStatus == "requisitar"){
+        ponteiro.partidaStatus = "requisitando";
+        if(ponteiro.salve == 1){
+            ponteiro.salve = 0;
+        }
+        geraMapa(ponteiro.nivel);
+    }else if(ponteiro.partidaStatus == "ativa"){
+        if(ponteiro.inimigos_existentes > 0 && jogador.nvidas > 0){
+            ponteiro.posicao+=jogador.velocidade;
+            
+            if(ponteiro.posicao>=DEFINE.COLUNAS_MAPA){
+                ponteiro.posicao = 0;
+            }
+            if(ponteiro.posicao<0){
+                ponteiro.posicao = DEFINE.COLUNAS_MAPA;
+            }
+
+            atualizaQuadro();
+
+            geraQuadro();
+        }else if(jogador.nvidas <= 0){
+            TELA = "creditos";
+        }else{
+            ponteiro.nivel+=1;
+            ponteiro.partidaStatus = "requisitar";
+        }
+    }
+}
 
 function FIM_DE_JOGO(){
     limpaQuadro();
     
-    centralize(" Pontuação: "+ ponteiro.pontuacao, 10);
-    centralize("FIM DE JOGO", 12);
+    centralize("FIM DE JOGO", 10);
+    centralize("Pontuação: "+ ponteiro.pontuacao, 12);
+    
+    centralize("CRÉDITOS", 18);
+
+	centralize("Programação && Design", 21);
+    centralize("Matheus Costa", 23);
+	
+    centralize("Musica", 26);
+	centralize("David Bowie - Starman (8bits)", 28);    
+
 }
-
-
-
-/** ::CONTROLE:: */
-function controleMenu(c, selecionado_indice){
-    c = c.toLowerCase();
-    switch(c){//o char eh convertido em minúsculo pra evitar erro de Capslock
-        case 's': //se a entrada for um S (pra baixo)
-            if(selecionado_indice<2) //verifica se está no ultimo item
-                ponteiro.selecionado_indice+=1;//senão, leva o cursor pro prox item
-          else ponteiro.selecionado_indice=0;//se sim, leva o cursor pro primeiro item
-           
-              break;
-      case 'w'://se a entrada for um W (pra cima)
-          if(selecionado_indice>0)//verifica se esta no primeiro item
-            ponteiro.selecionado_indice-=1;//senão, leva o cursor pro item de cima
-          else ponteiro.selecionado_indice=2;//se sim, leva o cursor para baixo
-          break;
-      case ' '://se a entrada for o espaço
-      case 10://ou enter
-          return selecionado_indice; //termina a função
-          break;
-      default: break;
-  }
-
-  return -1;
-}
-
-function ehParede(x, y){
-    return matriz[y] && matriz[y][x] == DEFINE.PAREDE;
-}
-
-function deletaInimigo(indice){
-    inimigo[indice] = inimigo[ponteiro.inimigos_existentes-1];
-    ponteiro.inimigos_existentes--;
-}
-
-
-
 function buscaTiro(){
     var i, j; // iteradores
 
-    for(i=0; i<DEFINE.MAX_TIROS; i++){
+    for(i=0; i<tiro.length; i++){
         if(typeof tiro[i]=="object"){ //se o tiro existe, verifica sua posição em relação ao boneco
              /*****************************/
             /**** Matando os Inimigos ****/
@@ -608,106 +719,6 @@ function buscaTiro(){
     return;    
 }
 
-function geraInimigo(x, y){
-    inimigo.push(boneco_t(x, y, 1, 1));
-}
-
 function geraTiro(prop, x, y){
     tiro.push(tiro_t(x, y, prop, DEFINE.DURACAO_TIRO));
 }
-
-function controlePartida(c){
-
-    c = c.toLowerCase(); //evita que o controle nao funcione caso o capslock esteja ativado
-
-    switch(c){
-        case 's': //se a entrada eh a tecla s
-            if(!ehParede(jogador.x+ponteiro.posicao, jogador.y+1)){//caso a prox pos pra baixo do jogador nao seja PAREDE
-                jogador.y+=1;                                     //desloca a nave para baixo
-            }
-            break;
-        case 'w': //se a entrada eh a tecla w
-            if(!ehParede(jogador.x+ponteiro.posicao, jogador.y-2)){//caso a prox pos pra cima do jogador nao seja PAREDE
-                jogador.y-=1;                                   //desloca a nave para cima
-            }
-            break;
-        case 'd'://se a entrada eh a tecla s
-            if(jogador.velocidade < DEFINE.VEL_MAX){ //confere se a velocidade eh menor que a max
-                jogador.velocidade++;               //antes de acelerar mais
-            }
-            break;
-        case 'a'://se a entrada eh a tecla a
-            if(jogador.velocidade > DEFINE.VEL_MIN){ //confere se a velocidade ainda eh maior que a min
-                jogador.velocidade--;               //antes de desacelerar
-            }
-            break;
-        case ' '://se a entrada eh um espaço
-            if(ponteiro.intervalo==0){ //(cooldown) se o tiro nao foi dado recentemente
-		    //gera o tiro a partir da posição do jogador, dentro dos limites da tela
-		    //ex.:tela na pos 400, jogador na pos 19: pos do jogador=419
-		    //sendo o limite da tela 414, %COLUNAS_MAPA garante que o tiro iniciará na pos verdadeira
-		    //do jogador(x=4)
-                geraTiro(1, (jogador.x + ponteiro.posicao) % DEFINE.COLUNAS_MAPA, jogador.y);
-                ponteiro.intervalo = DEFINE.INTERVALO_TIRO;//e atribui um valor de espera para novo tiro
-            }
-            break;
-
-        case 'g'://se a entrada eh um g
-            //*salvar_estado = 1; //o estado do jogo é salvo
-            break;
-
-        default:
-         break;
-    }    
-    return 0;
-}
-
-document.onkeypress = function(e){
-    e.preventDefault();
-
-    if(ponteiro.tocandoTema==0)
-        reproduzir();
-    
-    switch(TELA){
-        case "menu":
-            if((ponteiro.selecionado = controleMenu(e.key, ponteiro.selecionado_indice))!=-1){
-                switch(ponteiro.selecionado){
-                    case 0:
-                        TELA = "partida";
-                    break;
-                    case 1:
-                        TELA = "partida";
-                        ponteiro.salve = 1;
-                    break;
-                        case 2:
-                        TELA = "creditos";
-                    break;
-                }
-            }
-        break;
-        case "partida":
-            controlePartida(e.key);
-        break;
-        default:
-            return;
-    }
-}
-
-function startMobile(){
-    canvas.style.display = "block";
-}
-function modeMobile(){
-    botao = document.createElement("button");
-    botao.innerHTML = "Abrir FullScreen";
-    botao.style.display="block";
-    botao.style.margin = "auto";
-    botao.addEventListener("click", function(){
-        botao.style.display="none";
-        fullscreen();
-    });
-    document.body.appendChild(botao);
-}
-
-document.onfullscreenchange = window.onresize = function(){ console.log(startMobile()); }
-
-main();
