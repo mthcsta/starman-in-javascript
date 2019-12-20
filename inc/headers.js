@@ -24,8 +24,8 @@ var DEFINE = {
 
 // Tiro
     "MAX_TIROS": 15,
-    "VEL_BALA": 5,
-    "DURACAO_TIRO": 25,
+    "VEL_BALA": 2,
+    "DURACAO_TIRO": 100,
 
 // Jogador
     "DURACAO_ANIMACAO": 15,
