@@ -127,7 +127,7 @@ function main(){
         }
     }
 
-    requestAnimationFrame(main);
+    requestAnimFrame(main);
 }
 
 
