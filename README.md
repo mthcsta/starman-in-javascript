@@ -11,22 +11,32 @@ Este jogo funciona tanto em computador como em smartphones.
 ### Computador
 #### Movimentos
 __W__: mover a nave para cima
+
 __S__: mover a nave para baixo
+
 __A__: diminuir velocidade da nave
+
 __D__: aumentar velocidade da nave
 
+
 # Ações
-__ESPAÇO__: atira
+__ESPAÇO__: atira 
+
 __G__: salva estado
 
 
 ### Smartphone
 #### Movimentos
 Para fazer os movimentos da nave você precisa arrastar o dedo na tela, cada direção é um movimento
+
 __cima__: mover a nave para cima
+
 __baixo__: mover a nave para baixo
+
 __esquerda__: diminuir velocidade da nave
+
 __direita__: aumentar velocidade da nave
+
 
 #### Ações
 __TOQUE NA TELA__: atira
