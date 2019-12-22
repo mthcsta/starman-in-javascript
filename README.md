@@ -18,8 +18,7 @@ __A__: diminuir velocidade da nave
 
 __D__: aumentar velocidade da nave
 
-
-# Ações
+#### Ações
 __ESPAÇO__: atira 
 
 __G__: salva estado
@@ -36,7 +35,6 @@ __baixo__: mover a nave para baixo
 __esquerda__: diminuir velocidade da nave
 
 __direita__: aumentar velocidade da nave
-
 
 #### Ações
 __TOQUE NA TELA__: atira
