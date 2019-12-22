@@ -1,4 +1,4 @@
-#STARMAN
+# STARMAN
 
 __Jogo:__ STARMAN (baseado no defender)
 __Data de criação:__ Dezembro de 2019
