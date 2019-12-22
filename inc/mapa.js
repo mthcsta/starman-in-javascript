@@ -9,7 +9,7 @@ function geraMapa(indice){
             matriz = [];
             matriz[0] = [];
             inimigo = [];
-            tiro = [];            
+            tiro = [];
             while(c = mapa.charAt(i)){
                 if(c != "\n"){
                     
@@ -33,9 +33,13 @@ function geraMapa(indice){
                 i++;
             }
             ponteiro.partidaStatus = "ativa";
+
+            if(ponteiro.salve == 1){
+                carregarEstado();
+            }
           }, 
           function(){
-            TELA = "creditos";
+            classifica(ponteiro.pontuacao);
           });
 }
 

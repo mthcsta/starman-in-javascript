@@ -10,16 +10,15 @@ var DEFINE = {
     "LINHAS_MAPA": 35,
     "COLUNAS_MAPA": 415,
     "COLUNAS_TELA": 105,
-    "SALVE_ARQUIVO": "dados/salve.bin",
+    "SALVE_ARQUIVO": "salve.bin",
+    "DURACAO_SALVE_MENSAGEM": 40,
     "NIVEL_INEXISTENTE": -5,
-    "NOME_MAPA_TAMANHO": 50,
     "MAPA_CAMINHO": "mapas/nivel%d.txt",
-    "MUSICA_TEMA": 1,
-    "BUFFER_TAMANHO": 6, // tamanho do buffer de som que sera pego para reproduzir do arquivo mp3
 
-    "CLASSIFICADOS_ARQUIVO": "dados/classificados.bin",
+    "CLASSIFICADOS_ARQUIVO": "classificados.bin",
     "LIMITE_CLASSIFICADOS": 3,
     "NOME_TAMANHO_MAXIMO": 12,
+
 
 
 // Tiro
@@ -28,7 +27,7 @@ var DEFINE = {
     "DURACAO_TIRO": 100,
 
 // Jogador
-    "DURACAO_ANIMACAO": 15,
+    "DURACAO_ANIMACAO": 40,
     "INTERVALO_TIRO": 6,
     "VEL_MIN": 1,
     "VEL_MAX": 3,
@@ -43,9 +42,12 @@ var DEFINE = {
 
 /** Structs */
 
-boneco_t = function(x, y, nvidas, velocidade){ return {x, y, nvidas, velocidade} };
+boneco_t = function(x, y, nvidas, velocidade){ return {x:x, y:y, nvidas:nvidas, velocidade:velocidade} };
 
-tiro_t = function(x, y, prop, duracao){ return {x, y, prop, duracao} };
+tiro_t = function(x, y, prop, duracao){ return {x:x, y:y, prop:prop, duracao:duracao} };
+
+
+class_t = function(nome, pontuacao){ return {nome:nome, pontuacao:pontuacao}; }
 
 /*********************** */
 
@@ -85,8 +87,12 @@ ponteiro = {
     intervalo: 0,
     inimigos_existentes: 0,
     partidaStatus: "requisitar",
-    tocandoTema: 0
+    tocandoTema: 0,
+    salvar_estado: 0,
+    salvar_estado_mensagem: ""
 };
+
+_classificado = {posicao:DEFINE.LIMITE_CLASSIFICADOS*2, nome: "", pontuacao: 0};
 
 
 /** Mapa Info. */
@@ -102,10 +108,14 @@ var espera = 10;
 
 
 
+
 if(canvas.style.display == "none"){
     modeMobile();
     init();
     mobile = true;
+}
+if(window.location.hash != ""){
+    startMobile();
 }
 
 function main(){
@@ -121,6 +131,9 @@ function main(){
             case "partida":
                 partida();
             break;
+            case "classificado":
+                CLASSIFICADO();
+            break;
             case "creditos":
                 FIM_DE_JOGO();
             break;
@@ -131,8 +144,13 @@ function main(){
 }
 
 
-document.onkeypress = function(e){
+
+function kbhit(e, type){
+
     e.preventDefault();
+
+    if( TELA == "classificado" && type=="press" || 
+        TELA != "classificado" && typeof document.onkeypress != "undefined" && type=="up") return;
 
     if(ponteiro.tocandoTema==0)
         reproduzir();
@@ -150,6 +168,7 @@ document.onkeypress = function(e){
                     break;
                         case 2:
                         TELA = "creditos";
+                        ponteiro.pontuacao = -5;
                     break;
                 }
             }
@@ -157,10 +176,20 @@ document.onkeypress = function(e){
         case "partida":
             controlePartida(e.key);
         break;
+        case "classificado":
+            console.log(e.key);
+            controleClassificado(e.key);
+        break;
         default:
             return;
     }
 }
+
+if(document.onkeypress==null){
+    document.onkeypress = function(e){ return kbhit(e, 'press'); }
+}
+document.onkeyup = function(e){ return kbhit(e, 'up'); }
+
 document.addEventListener("DOMContentLoaded", main);
 
 

@@ -64,6 +64,97 @@ function fopen(file, callback1, callback2){
     }; 
     oXHR.send(null);  
 }
+function listaClassificados(linha){
+	var i;
+
+    var classificado;
+    var classificados;
+
+    var classificados = buscaClassificados();
+
+
+    centralize("#  | Jogador       | Pontuacao", linha);
+    linha+=2;
+	for(i=0; i<DEFINE.LIMITE_CLASSIFICADOS; i++){
+        classificado = classificados[i];
+        centralize(crimp(i, 3)+" "+crimp(classificado.nome, 15)+" "+crimp(classificado.pontuacao, 10), linha);
+		linha+=1.5;
+	}
+	return;
+}
+
+
+function insereClassificado(posicao, pontuacao, nome){
+	var i;
+    var j;
+    
+    var classificados = buscaClassificados();
+    var novo_classificados = [];
+    var novo_classificado = class_t(nome, pontuacao);
+    
+
+	for(i=0, j=0; i<DEFINE.LIMITE_CLASSIFICADOS; i++){
+		if(posicao==i){
+            novo_classificados.push(novo_classificado);
+		}else{
+            novo_classificados.push(classificados[j]);
+			j++;
+		}
+    }
+    if(localStorage){
+        localStorage.setItem(DEFINE.CLASSIFICADOS_ARQUIVO, JSON.stringify(novo_classificados));
+    }
+    return;
+}
+
+function classifica(pontuacao){
+	var buscando = 1;
+	var posicao=0;
+
+    var classificados = buscaClassificados();
+
+	// verifica se o jogador se encaixa em alguma das classificacoes de acordo com sua pontuacao
+	do{
+		if(classificados[posicao].pontuacao < pontuacao){
+			buscando = 0; // caso o usuario se encaixe, a é interrompida
+		}else
+			posicao++; // caso não se encaixe, pula pra proxima posição
+    } while(posicao<DEFINE.LIMITE_CLASSIFICADOS && buscando==1);
+    
+    if(buscando==0){ // se a busca foi interrompida, então ele foi classificado naquela posição;
+        _classificado.posicao = posicao;
+        _classificado.pontuacao = pontuacao;
+        TELA = "classificado";
+        ponteiro.pontuacao = 1;
+        return 1;
+    }
+
+    TELA = "creditos";
+
+	return 0;
+}
+
+function buscaClassificados(){
+    if(localStorage){
+        if(localStorage.getItem(DEFINE.CLASSIFICADOS_ARQUIVO) != null){
+            return JSON.parse(localStorage.getItem(DEFINE.CLASSIFICADOS_ARQUIVO));
+        }else{
+            geraClassificados();
+            return buscaClassificados();
+        }
+    }
+    return;
+}
+
+function geraClassificados(){
+    var dados;
+    if(localStorage){
+        dados = [class_t("DAVIDBOWIE69", 500), class_t("MAJORTOM", 200), class_t("DENRITCHIE", 30)];
+        localStorage.setItem(DEFINE.CLASSIFICADOS_ARQUIVO, JSON.stringify(dados));
+    }
+	return;
+}
+
 function controleMenu(c, selecionado_indice){
     c = c.toLowerCase();
     switch(c){//o char eh convertido em minúsculo pra evitar erro de Capslock
@@ -125,7 +216,13 @@ function controlePartida(c){
             break;
 
         case 'g'://se a entrada eh um g
-            //*salvar_estado = 1; //o estado do jogo é salvo
+            console.log("SALVO");
+            if(salvarEstado()){
+                ponteiro.salvar_estado_mensagem = "Estado Salvo";
+            }else{
+                ponteiro.salvar_estado_mensagem = "Erro ao Salvar Estado";
+            }
+            ponteiro.salvar_estado = DEFINE.DURACAO_SALVE_MENSAGEM;
             break;
 
         default:
@@ -133,6 +230,72 @@ function controlePartida(c){
     }    
     return 0;
 }
+
+function controleClassificado(c){
+    c = c.toLowerCase();
+    BotoesPermitidos = ['backspace','enter'];
+    if((c.match(/[^ a-z0-9]/g) || c.length>1) && BotoesPermitidos.indexOf(c) == -1) return;
+    switch(c){
+        case 'enter':
+            insereClassificado(_classificado.posicao, _classificado.pontuacao, _classificado.nome);
+            TELA = "creditos";
+        break;
+        case 'backspace':
+            _classificado.nome = _classificado.nome.slice(0, -1);
+        break;
+        case ' ':
+        break;
+        default:
+            _classificado.nome = _classificado.nome.substring(0, 11) +  c.toUpperCase();
+        break;
+    }
+}
+function salvarEstado(){
+    // ponteiro contem:
+    // Nivel, Posicao, Pontuacao, inimigos_existentes,
+    // Animacao, Intervalo
+    // -----------------------------------------------------
+    // jogador contem a estrutura boneco_t do jogador 
+    // tiro contem a estrutura tiro_t dos tiros(de jogador e inimigo)
+    // inimigo contem a estrutura boneco_t dos inimigos
+    if(localStorage){
+        dados = {ponteiro: ponteiro, 
+                jogador: jogador, 
+                tiro: tiro, 
+                inimigo: inimigo};
+
+        localStorage.setItem(DEFINE.SALVE_ARQUIVO, JSON.stringify(dados));
+        return true;
+    }
+    return false;
+}
+
+function carregarNivelEstado(){
+    if(localStorage){
+        if(localStorage.getItem(DEFINE.SALVE_ARQUIVO) != null){
+            ponteiro.nivel = JSON.parse(localStorage.getItem(DEFINE.SALVE_ARQUIVO)).ponteiro.nivel;
+            return;
+        }
+    }
+    ponteiro.salve = 0;
+	return;
+}
+
+
+function carregarEstado(){
+    if(localStorage){
+        if(localStorage.getItem(DEFINE.SALVE_ARQUIVO) != null){
+            dados = JSON.parse(localStorage.getItem(DEFINE.SALVE_ARQUIVO));
+            ponteiro = dados.ponteiro;
+            jogador = dados.jogador;
+            tiro = dados.tiro;
+            inimigo = dados.inimigo;
+        }
+    }
+    ponteiro.salve = 0;
+    return;
+}
+
 /* Defines */
 //Menu
 var DEFINE = {
@@ -145,16 +308,15 @@ var DEFINE = {
     "LINHAS_MAPA": 35,
     "COLUNAS_MAPA": 415,
     "COLUNAS_TELA": 105,
-    "SALVE_ARQUIVO": "dados/salve.bin",
+    "SALVE_ARQUIVO": "salve.bin",
+    "DURACAO_SALVE_MENSAGEM": 40,
     "NIVEL_INEXISTENTE": -5,
-    "NOME_MAPA_TAMANHO": 50,
     "MAPA_CAMINHO": "mapas/nivel%d.txt",
-    "MUSICA_TEMA": 1,
-    "BUFFER_TAMANHO": 6, // tamanho do buffer de som que sera pego para reproduzir do arquivo mp3
 
-    "CLASSIFICADOS_ARQUIVO": "dados/classificados.bin",
+    "CLASSIFICADOS_ARQUIVO": "classificados.bin",
     "LIMITE_CLASSIFICADOS": 3,
     "NOME_TAMANHO_MAXIMO": 12,
+
 
 
 // Tiro
@@ -163,7 +325,7 @@ var DEFINE = {
     "DURACAO_TIRO": 100,
 
 // Jogador
-    "DURACAO_ANIMACAO": 15,
+    "DURACAO_ANIMACAO": 40,
     "INTERVALO_TIRO": 6,
     "VEL_MIN": 1,
     "VEL_MAX": 3,
@@ -178,9 +340,12 @@ var DEFINE = {
 
 /** Structs */
 
-boneco_t = function(x, y, nvidas, velocidade){ return {x, y, nvidas, velocidade} };
+boneco_t = function(x, y, nvidas, velocidade){ return {x:x, y:y, nvidas:nvidas, velocidade:velocidade} };
 
-tiro_t = function(x, y, prop, duracao){ return {x, y, prop, duracao} };
+tiro_t = function(x, y, prop, duracao){ return {x:x, y:y, prop:prop, duracao:duracao} };
+
+
+class_t = function(nome, pontuacao){ return {nome:nome, pontuacao:pontuacao}; }
 
 /*********************** */
 
@@ -220,8 +385,12 @@ ponteiro = {
     intervalo: 0,
     inimigos_existentes: 0,
     partidaStatus: "requisitar",
-    tocandoTema: 0
+    tocandoTema: 0,
+    salvar_estado: 0,
+    salvar_estado_mensagem: ""
 };
+
+_classificado = {posicao:DEFINE.LIMITE_CLASSIFICADOS*2, nome: "", pontuacao: 0};
 
 
 /** Mapa Info. */
@@ -237,10 +406,14 @@ var espera = 10;
 
 
 
+
 if(canvas.style.display == "none"){
     modeMobile();
     init();
     mobile = true;
+}
+if(window.location.hash != ""){
+    startMobile();
 }
 
 function main(){
@@ -256,6 +429,9 @@ function main(){
             case "partida":
                 partida();
             break;
+            case "classificado":
+                CLASSIFICADO();
+            break;
             case "creditos":
                 FIM_DE_JOGO();
             break;
@@ -266,8 +442,13 @@ function main(){
 }
 
 
-document.onkeypress = function(e){
+
+function kbhit(e, type){
+
     e.preventDefault();
+
+    if( TELA == "classificado" && type=="press" || 
+        TELA != "classificado" && typeof document.onkeypress != "undefined" && type=="up") return;
 
     if(ponteiro.tocandoTema==0)
         reproduzir();
@@ -285,6 +466,7 @@ document.onkeypress = function(e){
                     break;
                         case 2:
                         TELA = "creditos";
+                        ponteiro.pontuacao = -5;
                     break;
                 }
             }
@@ -292,10 +474,20 @@ document.onkeypress = function(e){
         case "partida":
             controlePartida(e.key);
         break;
+        case "classificado":
+            console.log(e.key);
+            controleClassificado(e.key);
+        break;
         default:
             return;
     }
 }
+
+if(document.onkeypress==null){
+    document.onkeypress = function(e){ return kbhit(e, 'press'); }
+}
+document.onkeyup = function(e){ return kbhit(e, 'up'); }
+
 document.addEventListener("DOMContentLoaded", main);
 
 
@@ -377,7 +569,7 @@ function geraMapa(indice){
             matriz = [];
             matriz[0] = [];
             inimigo = [];
-            tiro = [];            
+            tiro = [];
             while(c = mapa.charAt(i)){
                 if(c != "\n"){
                     
@@ -401,9 +593,13 @@ function geraMapa(indice){
                 i++;
             }
             ponteiro.partidaStatus = "ativa";
+
+            if(ponteiro.salve == 1){
+                carregarEstado();
+            }
           }, 
           function(){
-            TELA = "creditos";
+            classifica(ponteiro.pontuacao);
           });
 }
 
@@ -470,7 +666,7 @@ function atualizaQuadro(){
 	// Contagens regressivas:
     if(ponteiro.animacao>0) ponteiro.animacao -= 1; // enquanto animação for maior que 0, o jogador fica piscando
     if(ponteiro.intervalo>0) ponteiro.intervalo -= 1; // enquanto intervalo for maior que zero, o jogador nao pode atirar
-    if(ponteiro.salvar_estado_mensagem>0) ponteiro.salvar_estado_mensagem -= 1; // enquanto salvar_estado_mensagem for maior que zero, uma mensagem "Estado Salvo" é exibida
+    if(ponteiro.salvar_estado>0) ponteiro.salvar_estado -= 1; // enquanto salvar_estado for maior que zero, uma mensagem "Estado Salvo" é exibida
 
 	// Checagem se o jogador está encostando em uma parede:
 	//  0 indica o primeiro caractere da nave(parte traseira),
@@ -592,7 +788,7 @@ function geraQuadro(){
 		}
     }
     
-    gotoxy("| Fase: "+ponteiro.nivel+" |  Vidas: "+jogador.nvidas+" |  Pontos: "+ponteiro.pontuacao+" | "+ponteiro.posicao, 0, -1, 'red', true);
+    gotoxy("| Fase: "+ponteiro.nivel+" |  Vidas: "+jogador.nvidas+" |  Pontos: "+ponteiro.pontuacao+"   "+((ponteiro.salvar_estado>0)?ponteiro.salvar_estado_mensagem:""), 0, -1, 'red', true);
 
 
 }
@@ -630,7 +826,7 @@ function partida(){
     if(ponteiro.partidaStatus == "requisitar"){
         ponteiro.partidaStatus = "requisitando";
         if(ponteiro.salve == 1){
-            ponteiro.salve = 0;
+            carregarNivelEstado();
         }
         geraMapa(ponteiro.nivel);
     }else if(ponteiro.partidaStatus == "ativa"){
@@ -648,7 +844,7 @@ function partida(){
 
             geraQuadro();
         }else if(jogador.nvidas <= 0){
-            TELA = "creditos";
+            classifica(ponteiro.pontuacao);
         }else{
             ponteiro.nivel+=1;
             ponteiro.partidaStatus = "requisitar";
@@ -656,11 +852,28 @@ function partida(){
     }
 }
 
-function FIM_DE_JOGO(){
+function CLASSIFICADO(){
     limpaQuadro();
-    
-    centralize("FIM DE JOGO", 10);
-    centralize("Pontuação: "+ ponteiro.pontuacao, 12);
+
+    if(_classificado.posicao == 0){
+        centralize("Você  obteve  a maior pontuação! Parabéns.",5);
+    }else{
+        centralize("Você alcançou uma pontuação considerável para entrar nas 3 classificações, Parabéns!",5);
+    }
+    centralize("Digite seu nome para ser inserido na lista:", 8);
+    centralize(_classificado.nome,10);
+}
+
+function FIM_DE_JOGO(){
+    limpaQuadro();    
+
+    centralize("FIM DE JOGO", 8);
+
+    if(ponteiro.pontuacao == 1){
+        listaClassificados(10);
+    }else if(ponteiro.pontuacao >= 0){
+        centralize("Pontuação: "+ ponteiro.pontuacao, 10);
+    }
     
     centralize("CRÉDITOS", 18);
 

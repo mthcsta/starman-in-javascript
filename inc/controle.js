@@ -59,11 +59,37 @@ function controlePartida(c){
             break;
 
         case 'g'://se a entrada eh um g
-            //*salvar_estado = 1; //o estado do jogo é salvo
+            console.log("SALVO");
+            if(salvarEstado()){
+                ponteiro.salvar_estado_mensagem = "Estado Salvo";
+            }else{
+                ponteiro.salvar_estado_mensagem = "Erro ao Salvar Estado";
+            }
+            ponteiro.salvar_estado = DEFINE.DURACAO_SALVE_MENSAGEM;
             break;
 
         default:
          break;
     }    
     return 0;
+}
+
+function controleClassificado(c){
+    c = c.toLowerCase();
+    BotoesPermitidos = ['backspace','enter'];
+    if((c.match(/[^ a-z0-9]/g) || c.length>1) && BotoesPermitidos.indexOf(c) == -1) return;
+    switch(c){
+        case 'enter':
+            insereClassificado(_classificado.posicao, _classificado.pontuacao, _classificado.nome);
+            TELA = "creditos";
+        break;
+        case 'backspace':
+            _classificado.nome = _classificado.nome.slice(0, -1);
+        break;
+        case ' ':
+        break;
+        default:
+            _classificado.nome = _classificado.nome.substring(0, 11) +  c.toUpperCase();
+        break;
+    }
 }

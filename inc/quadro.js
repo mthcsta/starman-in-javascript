@@ -23,7 +23,7 @@ function atualizaQuadro(){
 	// Contagens regressivas:
     if(ponteiro.animacao>0) ponteiro.animacao -= 1; // enquanto animação for maior que 0, o jogador fica piscando
     if(ponteiro.intervalo>0) ponteiro.intervalo -= 1; // enquanto intervalo for maior que zero, o jogador nao pode atirar
-    if(ponteiro.salvar_estado_mensagem>0) ponteiro.salvar_estado_mensagem -= 1; // enquanto salvar_estado_mensagem for maior que zero, uma mensagem "Estado Salvo" é exibida
+    if(ponteiro.salvar_estado>0) ponteiro.salvar_estado -= 1; // enquanto salvar_estado for maior que zero, uma mensagem "Estado Salvo" é exibida
 
 	// Checagem se o jogador está encostando em uma parede:
 	//  0 indica o primeiro caractere da nave(parte traseira),
@@ -145,7 +145,7 @@ function geraQuadro(){
 		}
     }
     
-    gotoxy("| Fase: "+ponteiro.nivel+" |  Vidas: "+jogador.nvidas+" |  Pontos: "+ponteiro.pontuacao+" | "+ponteiro.posicao, 0, -1, 'red', true);
+    gotoxy("| Fase: "+ponteiro.nivel+" |  Vidas: "+jogador.nvidas+" |  Pontos: "+ponteiro.pontuacao+"   "+((ponteiro.salvar_estado>0)?ponteiro.salvar_estado_mensagem:""), 0, -1, 'red', true);
 
 
 }

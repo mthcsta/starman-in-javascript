@@ -113,16 +113,16 @@ function onPointerMove(e) {
             lastUpdate.y.id = e.pointerId;
             holding[e.pointerId] = 0;
             if(touches.item(e.pointerId).y > e.clientY){
-                document.onkeypress({key:'W',preventDefault:function(){}})
-            }else document.onkeypress({key:'S',preventDefault:function(){}})
+                document.onkeyup({key:'W',preventDefault:function(){}})
+            }else document.onkeyup({key:'S',preventDefault:function(){}})
         }
         if((lastUpdate.x.id == e.pointerId || lastUpdate.x.id == 0) && Math.abs(lastUpdate.x.pos - e.clientX) > 60){
             lastUpdate.x.pos = e.clientX;
             lastUpdate.x.id = e.pointerId;
             holding[e.pointerId] = 0;
             if(touches.item(e.pointerId).x > e.clientX){
-                document.onkeypress({key:'A',preventDefault:function(){}})
-            }else document.onkeypress({key:'D',preventDefault:function(){}})
+                document.onkeyup({key:'A',preventDefault:function(){}})
+            }else document.onkeyup({key:'D',preventDefault:function(){}})
         }
         
 
@@ -133,7 +133,7 @@ function onPointerMove(e) {
 
 function onPointerUp(e) {
     if(holding[e.pointerId]!=0 && holding[e.pointerId]>Date.now()){ 
-        document.onkeypress({key:' ',preventDefault:function(){}});
+        document.onkeyup({key:' ',preventDefault:function(){}});
         holding[e.pointerId] = 0;
     }
     if(lastUpdate.y.id == e.pointerId){

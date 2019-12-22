@@ -32,7 +32,7 @@ function partida(){
     if(ponteiro.partidaStatus == "requisitar"){
         ponteiro.partidaStatus = "requisitando";
         if(ponteiro.salve == 1){
-            ponteiro.salve = 0;
+            carregarNivelEstado();
         }
         geraMapa(ponteiro.nivel);
     }else if(ponteiro.partidaStatus == "ativa"){
@@ -50,7 +50,7 @@ function partida(){
 
             geraQuadro();
         }else if(jogador.nvidas <= 0){
-            TELA = "creditos";
+            classifica(ponteiro.pontuacao);
         }else{
             ponteiro.nivel+=1;
             ponteiro.partidaStatus = "requisitar";
@@ -58,11 +58,28 @@ function partida(){
     }
 }
 
-function FIM_DE_JOGO(){
+function CLASSIFICADO(){
     limpaQuadro();
-    
-    centralize("FIM DE JOGO", 10);
-    centralize("Pontuação: "+ ponteiro.pontuacao, 12);
+
+    if(_classificado.posicao == 0){
+        centralize("Você  obteve  a maior pontuação! Parabéns.",5);
+    }else{
+        centralize("Você alcançou uma pontuação considerável para entrar nas 3 classificações, Parabéns!",5);
+    }
+    centralize("Digite seu nome para ser inserido na lista:", 8);
+    centralize(_classificado.nome,10);
+}
+
+function FIM_DE_JOGO(){
+    limpaQuadro();    
+
+    centralize("FIM DE JOGO", 8);
+
+    if(ponteiro.pontuacao == 1){
+        listaClassificados(10);
+    }else if(ponteiro.pontuacao >= 0){
+        centralize("Pontuação: "+ ponteiro.pontuacao, 10);
+    }
     
     centralize("CRÉDITOS", 18);
 
