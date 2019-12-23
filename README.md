@@ -19,12 +19,15 @@ __A__: diminuir velocidade da nave
 __D__: aumentar velocidade da nave
 
 #### Ações
-__ESPAÇO__: atira 
+__espaço__: atira 
 
 __G__: salva estado
 
 
+
+
 ### Smartphone
+
 #### Movimentos
 Para fazer os movimentos da nave você precisa arrastar o dedo na tela, cada direção é um movimento
 
@@ -37,7 +40,8 @@ __esquerda__: diminuir velocidade da nave
 __direita__: aumentar velocidade da nave
 
 #### Ações
-__TOQUE NA TELA__: atira
+__toque na tela__: atira
+
 
 
 

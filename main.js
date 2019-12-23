@@ -36,7 +36,7 @@ function gotoxy(letter, x, y, color='white', bold=false){
   
 /* Fullscreen */
 function fullscreen(){
-	var e = document.getElementsByTagName("canvas")[0]; // element
+	var e = document.body; // element
 	(e.requestFullscreen && e.requestFullscreen())
 	||
 	(e.msRequestFullscreen && e.msRequestFullscreen())
@@ -126,6 +126,8 @@ function classifica(pontuacao){
         _classificado.pontuacao = pontuacao;
         TELA = "classificado";
         ponteiro.pontuacao = 1;
+        
+        criaButao();
         return 1;
     }
 
@@ -244,6 +246,15 @@ function controleClassificado(c){
             _classificado.nome = _classificado.nome.slice(0, -1);
         break;
         case ' ':
+            if(mobile==true){       
+                console.log("X");      
+                /*         
+                document.getElementsByTagName("canvas")[0].classList.add("invisivel");
+                document.getElementsByClassName("butao")[0].classList.remove("invisivel");
+                */
+               
+               butao.show();
+            }
         break;
         default:
             _classificado.nome = _classificado.nome.substring(0, 11) +  c.toUpperCase();
@@ -393,6 +404,11 @@ ponteiro = {
 _classificado = {posicao:DEFINE.LIMITE_CLASSIFICADOS*2, nome: "", pontuacao: 0};
 
 
+var tecladoAberto = false;
+var mobile = false;
+var butao;
+
+
 /** Mapa Info. */
 
 var i;
@@ -401,7 +417,6 @@ var linha;
 var matriz;
 var jpos = 0;
 var delta = 0;
-var mobile = false;
 var espera = 10;
 
 
@@ -475,13 +490,14 @@ function kbhit(e, type){
             controlePartida(e.key);
         break;
         case "classificado":
-            console.log(e.key);
+            if(tecladoAberto) return;
             controleClassificado(e.key);
         break;
         default:
             return;
     }
 }
+
 
 if(document.onkeypress==null){
     document.onkeypress = function(e){ return kbhit(e, 'press'); }
@@ -490,8 +506,9 @@ document.onkeyup = function(e){ return kbhit(e, 'up'); }
 
 document.addEventListener("DOMContentLoaded", main);
 
-
-
+window.onload = function(){
+    classifica(10002);
+}
 function atualizaInimigo(indice){
     var minimo = 1, maximo = 5;//variaveis para sorteio de movimento
     var andou_x=0;
@@ -627,9 +644,48 @@ function modeMobile(){
 }
 
 
+/** Hack para classificados */
+function criaButao(){
+
+    butao = document.createElement('input');
+    butao.type = 'text';
+    butao.className = "butao invisivel";
+    butao.maxLength = DEFINE.NOME_TAMANHO_MAXIMO;
+    
+    
+    butao.onkeyup = function(e){
+        if(e.keyCode == 13){
+            controleClassificado('enter');
+            butao.blur();
+            return;
+        }
+        _classificado.nome = butao.value;
+    }
+    butao.onblur = function(){
+        butao.classList.add("invisivel");
+        document.getElementsByTagName("canvas")[0].classList.remove("invisivel");
+    }
+    butao.show = function(){
+        butao.classList.remove("invisivel");
+        document.getElementsByTagName("canvas")[0].classList.add("invisivel");
+        butao.focus();
+        setTimeout(function(){ 
+            tecladoAberto = true;
+        },300);
+    }
+
+    document.body.appendChild(butao);
+}
+
+
+
 document.onfullscreenchange = window.onresize = function(){ 
     if(typeof document.onfullscreenchange == "undefined" || isFullscreen() && window.innerWidth > window.innerHeight){
         startMobile(); 
+    }
+    if(mobile==true && tecladoAberto == true){
+        tecladoAberto = false;
+        butao.blur();
     }
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -863,6 +919,10 @@ function CLASSIFICADO(){
     centralize("Digite seu nome para ser inserido na lista:", 8);
     centralize(_classificado.nome,10);
 }
+
+
+
+
 
 function FIM_DE_JOGO(){
     limpaQuadro();    

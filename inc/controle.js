@@ -87,6 +87,15 @@ function controleClassificado(c){
             _classificado.nome = _classificado.nome.slice(0, -1);
         break;
         case ' ':
+            if(mobile==true){       
+                console.log("X");      
+                /*         
+                document.getElementsByTagName("canvas")[0].classList.add("invisivel");
+                document.getElementsByClassName("butao")[0].classList.remove("invisivel");
+                */
+               
+               butao.show();
+            }
         break;
         default:
             _classificado.nome = _classificado.nome.substring(0, 11) +  c.toUpperCase();

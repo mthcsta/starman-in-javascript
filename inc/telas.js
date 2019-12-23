@@ -70,6 +70,10 @@ function CLASSIFICADO(){
     centralize(_classificado.nome,10);
 }
 
+
+
+
+
 function FIM_DE_JOGO(){
     limpaQuadro();    
 

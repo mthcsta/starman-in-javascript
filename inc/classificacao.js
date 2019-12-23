@@ -60,6 +60,8 @@ function classifica(pontuacao){
         _classificado.pontuacao = pontuacao;
         TELA = "classificado";
         ponteiro.pontuacao = 1;
+        
+        criaButao();
         return 1;
     }
 

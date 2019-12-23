@@ -114,7 +114,12 @@ function onPointerMove(e) {
             holding[e.pointerId] = 0;
             if(touches.item(e.pointerId).y > e.clientY){
                 document.onkeyup({key:'W',preventDefault:function(){}})
-            }else document.onkeyup({key:'S',preventDefault:function(){}})
+                document.onkeypress({key:'W',preventDefault:function(){}})
+            }else{ 
+                document.onkeyup({key:'S',preventDefault:function(){}})
+                document.onkeypress({key:'S',preventDefault:function(){}})
+                
+            }
         }
         if((lastUpdate.x.id == e.pointerId || lastUpdate.x.id == 0) && Math.abs(lastUpdate.x.pos - e.clientX) > 60){
             lastUpdate.x.pos = e.clientX;
@@ -122,7 +127,11 @@ function onPointerMove(e) {
             holding[e.pointerId] = 0;
             if(touches.item(e.pointerId).x > e.clientX){
                 document.onkeyup({key:'A',preventDefault:function(){}})
-            }else document.onkeyup({key:'D',preventDefault:function(){}})
+                document.onkeypress({key:'A',preventDefault:function(){}})
+            }else{ 
+                document.onkeyup({key:'D',preventDefault:function(){}})
+                document.onkeypress({key:'D',preventDefault:function(){}})
+            }
         }
         
 
@@ -134,6 +143,7 @@ function onPointerMove(e) {
 function onPointerUp(e) {
     if(holding[e.pointerId]!=0 && holding[e.pointerId]>Date.now()){ 
         document.onkeyup({key:' ',preventDefault:function(){}});
+        document.onkeypress({key:' ',preventDefault:function(){}});
         holding[e.pointerId] = 0;
     }
     if(lastUpdate.y.id == e.pointerId){

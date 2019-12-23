@@ -36,7 +36,7 @@ function gotoxy(letter, x, y, color='white', bold=false){
   
 /* Fullscreen */
 function fullscreen(){
-	var e = document.getElementsByTagName("canvas")[0]; // element
+	var e = document.body; // element
 	(e.requestFullscreen && e.requestFullscreen())
 	||
 	(e.msRequestFullscreen && e.msRequestFullscreen())

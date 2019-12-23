@@ -95,6 +95,11 @@ ponteiro = {
 _classificado = {posicao:DEFINE.LIMITE_CLASSIFICADOS*2, nome: "", pontuacao: 0};
 
 
+var tecladoAberto = false;
+var mobile = false;
+var butao;
+
+
 /** Mapa Info. */
 
 var i;
@@ -103,7 +108,6 @@ var linha;
 var matriz;
 var jpos = 0;
 var delta = 0;
-var mobile = false;
 var espera = 10;
 
 
@@ -177,13 +181,14 @@ function kbhit(e, type){
             controlePartida(e.key);
         break;
         case "classificado":
-            console.log(e.key);
+            if(tecladoAberto) return;
             controleClassificado(e.key);
         break;
         default:
             return;
     }
 }
+
 
 if(document.onkeypress==null){
     document.onkeypress = function(e){ return kbhit(e, 'press'); }
@@ -192,4 +197,6 @@ document.onkeyup = function(e){ return kbhit(e, 'up'); }
 
 document.addEventListener("DOMContentLoaded", main);
 
-
+window.onload = function(){
+    classifica(10002);
+}
