@@ -77,7 +77,7 @@ function listaClassificados(linha){
     linha+=2;
 	for(i=0; i<DEFINE.LIMITE_CLASSIFICADOS; i++){
         classificado = classificados[i];
-        centralize(crimp(i, 3)+" "+crimp(classificado.nome, 15)+" "+crimp(classificado.pontuacao, 10), linha);
+        centralize(crimp(i+1, 3)+" "+crimp(classificado.nome, 15)+" "+crimp(classificado.pontuacao, 10), linha);
 		linha+=1.5;
 	}
 	return;
@@ -126,7 +126,7 @@ function classifica(pontuacao){
         _classificado.pontuacao = pontuacao;
         TELA = "classificado";
         ponteiro.pontuacao = 1;
-        
+
         criaButao();
         return 1;
     }
