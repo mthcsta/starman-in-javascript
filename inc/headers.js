@@ -196,7 +196,3 @@ if(document.onkeypress==null){
 document.onkeyup = function(e){ return kbhit(e, 'up'); }
 
 document.addEventListener("DOMContentLoaded", main);
-
-window.onload = function(){
-    classifica(10002);
-}

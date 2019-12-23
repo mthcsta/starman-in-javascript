@@ -506,9 +506,6 @@ document.onkeyup = function(e){ return kbhit(e, 'up'); }
 
 document.addEventListener("DOMContentLoaded", main);
 
-window.onload = function(){
-    classifica(10002);
-}
 function atualizaInimigo(indice){
     var minimo = 1, maximo = 5;//variaveis para sorteio de movimento
     var andou_x=0;
