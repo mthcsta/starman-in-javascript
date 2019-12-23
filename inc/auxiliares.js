@@ -43,7 +43,9 @@ function fullscreen(){
 	||
 	(e.mozRequestFullScreen && e.mozRequestFullScreen())
 	||
-	(e.webkitRequestFullscreen && e.webkitRequestFullscreen());
+    (e.webkitRequestFullscreen && e.webkitRequestFullscreen());
+    
+    screen.orientation.lock("landscape");
 }
 function isFullscreen(){
 	return Boolean(document.fullscreen || document.webkitFullscreen || document.mozFullScreen || document.msFullscreen);
