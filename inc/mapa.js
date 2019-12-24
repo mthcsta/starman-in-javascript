@@ -39,10 +39,19 @@ function geraMapa(indice){
             }
           }, 
           function(){
+            ponteiro.pontuacao += (jogador.nvidas * 100);
             classifica(ponteiro.pontuacao);
           });
 }
 
 function ehParede(x, y){
     return matriz[y] && matriz[y][x] == DEFINE.PAREDE;
+}
+
+function buscaCaminho(x, y=0){
+    
+    if(!ehParede(x, y)) return buscaCaminho(x, y+1);
+
+    return y + 2;
+
 }

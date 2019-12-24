@@ -617,12 +617,21 @@ function geraMapa(indice){
             }
           }, 
           function(){
+            ponteiro.pontuacao += (jogador.nvidas * 100);
             classifica(ponteiro.pontuacao);
           });
 }
 
 function ehParede(x, y){
     return matriz[y] && matriz[y][x] == DEFINE.PAREDE;
+}
+
+function buscaCaminho(x, y=0){
+    
+    if(!ehParede(x, y)) return buscaCaminho(x, y+1);
+
+    return y + 2;
+
 }
 function startMobile(){
     canvas.style.display = "block";
@@ -752,7 +761,7 @@ function atualizaQuadro(){
 			jogador.nvidas--; //o jogador perde uma vida
 	        ponteiro.animacao = DEFINE.DURACAO_ANIMACAO; //a perda da vida é sinalizada por animação
 		}
-        jogador.y = 15; //buscaParede(mapa, jogador.x+posicao+4, 0, 1, 0) + 2; // a posição do jogador é redefinida para um lugar aberto sem parede.
+        jogador.y = buscaCaminho(jogador.x+ponteiro.posicao+4); // a posição do jogador é redefinida para um lugar aberto sem parede.
         jogador.velocidade = DEFINE.VEL_MIN; // o jogador volta para a velocidade minima
     }
 
