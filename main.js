@@ -374,6 +374,8 @@ document.body.appendChild(canvas)
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+canvas.innerHTML = "Seu navegador não suporta a tag canvas do HTML5";
+
 canvas.style.backgroundColor = "black"
 canvas.style.border = "0px solid orangered";
 canvas.style.margin = "auto";
