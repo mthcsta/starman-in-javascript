@@ -9,7 +9,7 @@ function crimp(str, size){
     return ' '.repeat(add) + str + ' '.repeat(add);
 }
 function centralize(str, linha){
-    gotoxy(str, Math.round(50 - str.length/2), linha);
+    gotoxy(str, Math.floor(50 - str.length/2), linha);
 }
 function logo(){
     centralize(".dP\"Y8 888888    db    88\"\"Yb 8b    d8    db    88b 88 ", 5);

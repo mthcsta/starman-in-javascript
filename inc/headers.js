@@ -174,7 +174,7 @@ function kbhit(e, type){
                     break;
                         case 2:
                         TELA = "creditos";
-                        ponteiro.pontuacao = -5;
+                        ponteiro.pontuacao = 1;
                     break;
                 }
             }

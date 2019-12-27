@@ -9,7 +9,7 @@ function crimp(str, size){
     return ' '.repeat(add) + str + ' '.repeat(add);
 }
 function centralize(str, linha){
-    gotoxy(str, Math.round(50 - str.length/2), linha);
+    gotoxy(str, Math.floor(50 - str.length/2), linha);
 }
 function logo(){
     centralize(".dP\"Y8 888888    db    88\"\"Yb 8b    d8    db    88b 88 ", 5);
@@ -66,54 +66,42 @@ function fopen(file, callback1, callback2){
     }; 
     oXHR.send(null);  
 }
-function listaClassificados(linha){
+async function listaClassificados(linha){
 	var i;
 
     var classificado;
-    var classificados;
 
-    var classificados = buscaClassificados();
+    var classificados = await buscaClassificados();
 
-
-    centralize("#  | Jogador       | Pontuacao", linha);
+    centralize(crimp("#", 3)+" "+crimp("JOGADOR",16)+" "+crimp("PONTUAÇÃO",14), linha);
     linha+=2;
 	for(i=0; i<DEFINE.LIMITE_CLASSIFICADOS; i++){
         classificado = classificados[i];
-        centralize(crimp(i+1, 3)+" "+crimp(classificado.nome, 15)+" "+crimp(classificado.pontuacao, 10), linha);
+        centralize(crimp((i+1).toString(), 3)+" "+crimp(classificado.nome, 16)+" "+crimp((classificado.pontuacao).toString(), 13), linha);
 		linha+=1.5;
 	}
 	return;
 }
 
 
-function insereClassificado(posicao, pontuacao, nome){
-	var i;
-    var j;
-    
-    var classificados = buscaClassificados();
-    var novo_classificados = [];
-    var novo_classificado = class_t(nome, pontuacao);
-    
-
-	for(i=0, j=0; i<DEFINE.LIMITE_CLASSIFICADOS; i++){
-		if(posicao==i){
-            novo_classificados.push(novo_classificado);
-		}else{
-            novo_classificados.push(classificados[j]);
-			j++;
-		}
-    }
-    if(localStorage){
-        localStorage.setItem(DEFINE.CLASSIFICADOS_ARQUIVO, JSON.stringify(novo_classificados));
-    }
-    return;
+async function insereClassificado(posicao, pontuacao, nome){
+    return db.collection("classificados").add({
+        nome: nome,
+        pontuacao: pontuacao
+    })
+    .then(function(docRef) {
+        console.log("Document written with ID: ", docRef.id);
+    })
+    .catch(function(error) {
+        alert("Infelizmente ocorreu um erro na inserção da sua pontuação.\nErro: "+error);
+    });
 }
 
-function classifica(pontuacao){
+async function classifica(pontuacao){
 	var buscando = 1;
 	var posicao=0;
 
-    var classificados = buscaClassificados();
+    var classificados = await buscaClassificados();
 
 	// verifica se o jogador se encaixa em alguma das classificacoes de acordo com sua pontuacao
 	do{
@@ -139,26 +127,14 @@ function classifica(pontuacao){
 }
 
 function buscaClassificados(){
-    if(localStorage){
-        if(localStorage.getItem(DEFINE.CLASSIFICADOS_ARQUIVO) != null){
-            return JSON.parse(localStorage.getItem(DEFINE.CLASSIFICADOS_ARQUIVO));
-        }else{
-            geraClassificados();
-            return buscaClassificados();
-        }
-    }
-    return;
+    var dados = [];
+    return db.collection("classificados").orderBy("pontuacao", "desc").limit(DEFINE.LIMITE_CLASSIFICADOS).get().then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                dados.push(doc.data());
+            });
+            return (dados);
+        }).catch(r=>reject(r));
 }
-
-function geraClassificados(){
-    var dados;
-    if(localStorage){
-        dados = [class_t("DAVIDBOWIE69", 500), class_t("MAJORTOM", 200), class_t("DENRITCHIE", 30)];
-        localStorage.setItem(DEFINE.CLASSIFICADOS_ARQUIVO, JSON.stringify(dados));
-    }
-	return;
-}
-
 function controleMenu(c, selecionado_indice){
     c = c.toLowerCase();
     switch(c){//o char eh convertido em minúsculo pra evitar erro de Capslock
@@ -485,7 +461,7 @@ function kbhit(e, type){
                     break;
                         case 2:
                         TELA = "creditos";
-                        ponteiro.pontuacao = -5;
+                        ponteiro.pontuacao = 1;
                     break;
                 }
             }
@@ -953,6 +929,7 @@ function FIM_DE_JOGO(){
     centralize("FIM DE JOGO", 8);
 
     if(ponteiro.pontuacao == 1){
+        delta = Date.now() * 2;
         listaClassificados(10);
     }else if(ponteiro.pontuacao >= 0){
         centralize("Pontuação: "+ ponteiro.pontuacao, 10);

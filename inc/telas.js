@@ -80,6 +80,7 @@ function FIM_DE_JOGO(){
     centralize("FIM DE JOGO", 8);
 
     if(ponteiro.pontuacao == 1){
+        delta = Date.now() * 2;
         listaClassificados(10);
     }else if(ponteiro.pontuacao >= 0){
         centralize("Pontuação: "+ ponteiro.pontuacao, 10);
