@@ -933,6 +933,7 @@ function FIM_DE_JOGO(){
         listaClassificados(10);
     }else if(ponteiro.pontuacao >= 0){
         centralize("Pontuação: "+ ponteiro.pontuacao, 10);
+        setTimeout(function(){ ponteiro.pontuacao = 1; }, 2000);
     }
     
     centralize("CRÉDITOS", 18);
