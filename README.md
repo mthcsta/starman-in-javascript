@@ -4,7 +4,7 @@ __Jogo:__ STARMAN (baseado no defender)
 __Data de criação:__ Dezembro de 2019
 
 __Descrição detalhada:__
-Este jogo foi feito como um trabalho final para a cadeira de Algoritmos e Programação na linguagem C da faculdade [Link](https://github.com/mthcsta/starman). Como tenho um grande amor ao javascript, passei para a linguagem, refazendo algumas funções e modificações que fossem necessárias. 
+Este jogo foi feito como um trabalho final para a cadeira de Algoritmos e Programação na linguagem C da faculdade ([Link](https://github.com/mthcsta/starman)). Como tenho um grande amor ao javascript, passei para a linguagem, refazendo algumas funções e modificações que fossem necessárias. 
 Este jogo funciona tanto em computador como em smartphones.
 
 ## Controles
